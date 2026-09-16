@@ -1,0 +1,72 @@
+<div class="form-page" [class.embedded]="embedded">
+  <a *ngIf="!embedded" routerLink="/books" class="back-link">← Back to catalog</a>
+
+  <h1>{{ isEditMode ? 'Edit book' : 'Add a book' }}</h1>
+  <p class="subtitle">
+    {{ isEditMode ? 'Update the record, then save it to the ledger.' : 'Fill in the details to put a new title on the shelf.' }}
+  </p>
+
+  <div *ngIf="loading" class="state-panel">
+    <p>Loading book…</p>
+  </div>
+
+  <div *ngIf="loadError" class="state-panel error">
+    <p>{{ loadError }}</p>
+  </div>
+
+  <form *ngIf="!loading && !loadError" class="card" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label for="title">Title <span class="required">*</span></label>
+      <input id="title" type="text" formControlName="title" placeholder="Enter book title" />
+      <p class="field-error" *ngIf="f['title'].touched && f['title'].invalid">
+        <span *ngIf="f['title'].errors?.['required']">Title is required.</span>
+        <span *ngIf="f['title'].errors?.['maxlength']">Title cannot exceed 200 characters.</span>
+      </p>
+    </div>
+
+    <div class="field">
+      <label for="author">Author</label>
+      <input id="author" type="text" formControlName="author" placeholder="Enter author name" />
+      <p class="field-error" *ngIf="f['author'].touched && f['author'].invalid">
+        Author cannot exceed 150 characters.
+      </p>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="isbn">ISBN <span class="required">*</span></label>
+        <input id="isbn" class="mono" type="text" formControlName="isbn" placeholder="978…" />
+        <p class="field-error" *ngIf="f['isbn'].touched && f['isbn'].invalid">
+          <span *ngIf="f['isbn'].errors?.['required']">ISBN is required.</span>
+          <span *ngIf="f['isbn'].errors?.['maxlength']">ISBN cannot exceed 20 characters.</span>
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="category">Category</label>
+        <input id="category" type="text" formControlName="category" placeholder="Fiction, Science…" />
+        <p class="field-error" *ngIf="f['category'].touched && f['category'].invalid">
+          Category cannot exceed 100 characters.
+        </p>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="availableCopies">Available copies <span class="required">*</span></label>
+      <input id="availableCopies" type="number" min="0" formControlName="availableCopies" />
+      <p class="field-error" *ngIf="f['availableCopies'].touched && f['availableCopies'].invalid">
+        <span *ngIf="f['availableCopies'].errors?.['required']">Available copies is required.</span>
+        <span *ngIf="f['availableCopies'].errors?.['min']">Available copies cannot be negative.</span>
+      </p>
+    </div>
+
+    <div class="submit-error" *ngIf="submitError">{{ submitError }}</div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="saving">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="saving || form.invalid">
+        {{ saving ? 'Saving…' : (isEditMode ? 'Update book' : 'Add book') }}
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,157 @@
+<section class="catalog">
+  <div class="catalog-head">
+    <div>
+      <h1>Catalog</h1>
+      <p class="subtitle" *ngIf="!loading && !errorMessage">
+        {{ totalCount }} title{{ totalCount === 1 ? '' : 's' }} in the ledger
+      </p>
+    </div>
+    <button type="button" class="btn-primary" (click)="openAddModal()">+ Add book</button>
+  </div>
+
+  <div class="state-panel" *ngIf="loading">
+    <p>Loading the catalog…</p>
+  </div>
+
+  <div class="state-panel error" *ngIf="!loading && errorMessage">
+    <p>{{ errorMessage }}</p>
+    <button type="button" class="btn-secondary" (click)="fetchBooks()">Retry</button>
+  </div>
+
+  <div class="state-panel" *ngIf="!loading && !errorMessage && totalCount === 0">
+    <p>Your shelves are empty.</p>
+    <button type="button" class="btn-primary" (click)="openAddModal()">Add the first book</button>
+  </div>
+
+  <div class="table-wrap" *ngIf="!loading && !errorMessage && books.length > 0">
+    <table class="ledger">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>ISBN</th>
+          <th>Category</th>
+          <th class="num">Copies</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let book of books"
+          class="clickable"
+          (click)="openDetails(book)">
+          <td class="title-cell" data-label="Title">{{ book.title }}</td>
+          <td class="muted-cell" data-label="Author">{{ book.author || '—' }}</td>
+          <td class="isbn-cell" data-label="ISBN">{{ book.isbn }}</td>
+          <td data-label="Category">
+            <span class="pill" *ngIf="book.category; else noCategory">{{ book.category }}</span>
+            <ng-template #noCategory><span class="muted-cell">—</span></ng-template>
+          </td>
+          <td class="num" data-label="Copies" [class.zero]="book.availableCopies === 0">
+            {{ book.availableCopies }}
+          </td>
+          <td class="actions-col" data-label="Actions">
+            <button type="button" class="link-action" (click)="openEditModal(book, $event)">Edit</button>
+            <button type="button" class="link-action danger" (click)="askDelete(book, $event)">Remove</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pager" *ngIf="totalCount > 0">
+      <p class="pager-meta">
+        Showing {{ rangeStart }}–{{ rangeEnd }} of {{ totalCount }}
+      </p>
+
+      <nav class="pager-nav" aria-label="Catalog pages">
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="pageIndex === 1"
+          (click)="goToPage(pageIndex - 1)">
+          Prev
+        </button>
+
+        <button
+          type="button"
+          class="page-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === pageIndex"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="page-btn"
+          [disabled]="pageIndex >= totalPages"
+          (click)="goToPage(pageIndex + 1)">
+          Next
+        </button>
+      </nav>
+
+      <label class="page-size">
+        Per page
+        <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</section>
+
+<div class="dialog-backdrop" *ngIf="selectedBook" (click)="closeDetails()">
+  <div class="dialog details-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <h3>{{ selectedBook.title }}</h3>
+    <p class="details-status" *ngIf="detailsLoading">Loading latest details…</p>
+    <p class="details-status error" *ngIf="detailsError">{{ detailsError }}</p>
+
+    <dl class="details-grid" *ngIf="!detailsError">
+      <div>
+        <dt>Author</dt>
+        <dd>{{ selectedBook.author || '—' }}</dd>
+      </div>
+      <div>
+        <dt>ISBN</dt>
+        <dd class="mono">{{ selectedBook.isbn }}</dd>
+      </div>
+      <div>
+        <dt>Category</dt>
+        <dd>{{ selectedBook.category || '—' }}</dd>
+      </div>
+      <div>
+        <dt>Available copies</dt>
+        <dd [class.zero]="selectedBook.availableCopies === 0">{{ selectedBook.availableCopies }}</dd>
+      </div>
+    </dl>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary" (click)="closeDetails()">Close</button>
+      <button type="button" class="btn-primary" (click)="openEditModal(selectedBook!)">Edit</button>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-backdrop" *ngIf="bookPendingDelete" (click)="cancelDelete()">
+  <div class="dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <h3>Remove this book?</h3>
+    <p>“{{ bookPendingDelete.title }}” will be removed from the catalog. This can't be undone.</p>
+    <div class="dialog-actions">
+      <button type="button" class="btn-secondary" (click)="cancelDelete()" [disabled]="deleting">Cancel</button>
+      <button type="button" class="btn-danger" (click)="confirmDelete()" [disabled]="deleting">
+        {{ deleting ? 'Removing…' : 'Remove' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-backdrop" *ngIf="showFormModal" (click)="closeFormModal()">
+  <div class="dialog form-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    <app-book-form
+      [embedded]="true"
+      [presetBookId]="editingBookId"
+      (saved)="onFormSaved()"
+      (cancelled)="closeFormModal()">
+    </app-book-form>
+  </div>
+</div>
