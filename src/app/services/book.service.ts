@@ -44,7 +44,9 @@ export class BookService {
   );
 }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
+  delete(id: number): Observable<string> {
+  return this.http.delete(`${this.apiUrl}/${id}`, {
+    responseType: 'text'
+  });
+}
 }
