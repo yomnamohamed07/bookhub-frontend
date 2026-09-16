@@ -1,4 +1,3 @@
-
 <div class="form-page" [class.embedded]="embedded">
   <a *ngIf="!embedded" routerLink="/books" class="back-link">← Back to catalog</a>
 
@@ -21,15 +20,18 @@
       <input id="title" type="text" formControlName="title" placeholder="Enter book title" />
       <p class="field-error" *ngIf="f['title'].touched && f['title'].invalid">
         <span *ngIf="f['title'].errors?.['required']">Title is required.</span>
+        <span *ngIf="f['title'].errors?.['minlength']">Title must be at least 3 characters.</span>
         <span *ngIf="f['title'].errors?.['maxlength']">Title cannot exceed 200 characters.</span>
       </p>
     </div>
 
     <div class="field">
-      <label for="author">Author</label>
+      <label for="author">Author <span class="required">*</span></label>
       <input id="author" type="text" formControlName="author" placeholder="Enter author name" />
       <p class="field-error" *ngIf="f['author'].touched && f['author'].invalid">
-        Author cannot exceed 150 characters.
+        <span *ngIf="f['author'].errors?.['required']">Author is required.</span>
+        <span *ngIf="f['author'].errors?.['minlength']">Author must be at least 3 characters.</span>
+        <span *ngIf="f['author'].errors?.['maxlength']">Author cannot exceed 200 characters.</span>
       </p>
     </div>
 
@@ -47,15 +49,17 @@
         <p class="field-error" *ngIf="f['isbn'].touched && f['isbn'].invalid">
           <span *ngIf="f['isbn'].errors?.['required']">ISBN is required.</span>
           <span *ngIf="f['isbn'].errors?.['maxlength']">ISBN cannot exceed 20 characters.</span>
-          <span *ngIf="f['isbn'].errors?.['backend']">{{ submitError }}</span>
+          <span *ngIf="f['isbn'].errors?.['backend']">{{ f['isbn'].errors?.['message'] }}</span>
         </p>
       </div>
 
       <div class="field">
-        <label for="category">Category</label>
+        <label for="category">Category <span class="required">*</span></label>
         <input id="category" type="text" formControlName="category" placeholder="Fiction, Science…" />
         <p class="field-error" *ngIf="f['category'].touched && f['category'].invalid">
-          Category cannot exceed 100 characters.
+          <span *ngIf="f['category'].errors?.['required']">Category is required.</span>
+          <span *ngIf="f['category'].errors?.['minlength']">Category must be at least 2 characters.</span>
+          <span *ngIf="f['category'].errors?.['maxlength']">Category cannot exceed 200 characters.</span>
         </p>
       </div>
     </div>
@@ -69,7 +73,6 @@
       </p>
     </div>
 
-   
     <div class="submit-error" *ngIf="submitError && !f['isbn'].errors?.['backend']">
       {{ submitError }}
     </div>

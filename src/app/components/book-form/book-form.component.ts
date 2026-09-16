@@ -79,6 +79,7 @@ export class BookFormComponent implements OnInit {
         '',
         [
           Validators.required,
+          Validators.minLength(3),
           Validators.maxLength(200)
         ]
       ],
@@ -86,7 +87,9 @@ export class BookFormComponent implements OnInit {
       author: [
         '',
         [
-          Validators.maxLength(150)
+          Validators.required,
+          Validators.minLength(3),
+          Validators.maxLength(200)
         ]
       ],
 
@@ -101,7 +104,9 @@ export class BookFormComponent implements OnInit {
       category: [
         '',
         [
-          Validators.maxLength(100)
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(200)
         ]
       ],
 
@@ -193,7 +198,6 @@ export class BookFormComponent implements OnInit {
 
     this.submitError = '';
 
-    
     this.form.get('isbn')?.setErrors(null);
 
     if (this.form.invalid) {
@@ -306,16 +310,16 @@ export class BookFormComponent implements OnInit {
 
     this.saving = false;
 
-  
-    const backendMessage = err?.error?.message;
+    const backendMessage =
+      err?.error?.errorMessage ||
+      err?.error?.message ||
+      err?.error?.error;
 
     if (err?.status === 400) {
-
 
       if (err?.error?.errors && Array.isArray(err.error.errors)) {
 
         this.submitError = err.error.errors[0];
-
       }
       else {
 
@@ -323,10 +327,12 @@ export class BookFormComponent implements OnInit {
           backendMessage ||
           'Invalid data. Please check the form.';
 
-       
         if (backendMessage?.toLowerCase().includes('isbn')) {
 
-          this.form.get('isbn')?.setErrors({ backend: true });
+          this.form.get('isbn')?.setErrors({
+            backend: true,
+            message: backendMessage
+          });
 
           this.form.get('isbn')?.markAsTouched();
 
