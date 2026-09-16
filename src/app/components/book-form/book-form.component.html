@@ -1,3 +1,4 @@
+
 <div class="form-page" [class.embedded]="embedded">
   <a *ngIf="!embedded" routerLink="/books" class="back-link">← Back to catalog</a>
 
@@ -35,10 +36,18 @@
     <div class="field-row">
       <div class="field">
         <label for="isbn">ISBN <span class="required">*</span></label>
-        <input id="isbn" class="mono" type="text" formControlName="isbn" placeholder="978…" />
+        <input
+          id="isbn"
+          class="mono"
+          type="text"
+          formControlName="isbn"
+          placeholder="978…"
+          [class.input-error]="f['isbn'].touched && f['isbn'].invalid"
+        />
         <p class="field-error" *ngIf="f['isbn'].touched && f['isbn'].invalid">
           <span *ngIf="f['isbn'].errors?.['required']">ISBN is required.</span>
           <span *ngIf="f['isbn'].errors?.['maxlength']">ISBN cannot exceed 20 characters.</span>
+          <span *ngIf="f['isbn'].errors?.['backend']">{{ submitError }}</span>
         </p>
       </div>
 
@@ -60,7 +69,10 @@
       </p>
     </div>
 
-    <div class="submit-error" *ngIf="submitError">{{ submitError }}</div>
+   
+    <div class="submit-error" *ngIf="submitError && !f['isbn'].errors?.['backend']">
+      {{ submitError }}
+    </div>
 
     <div class="form-actions">
       <button type="button" class="btn-secondary" (click)="cancel()" [disabled]="saving">Cancel</button>

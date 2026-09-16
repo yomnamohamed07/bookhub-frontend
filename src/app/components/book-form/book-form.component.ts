@@ -193,6 +193,9 @@ export class BookFormComponent implements OnInit {
 
     this.submitError = '';
 
+    
+    this.form.get('isbn')?.setErrors(null);
+
     if (this.form.invalid) {
 
       this.form.markAllAsTouched();
@@ -303,38 +306,42 @@ export class BookFormComponent implements OnInit {
 
     this.saving = false;
 
+  
+    const backendMessage = err?.error?.message;
 
-    if (err?.status === 409) {
+    if (err?.status === 400) {
 
-      this.submitError =
-        'This ISBN is already used by another book.';
 
-    }
+      if (err?.error?.errors && Array.isArray(err.error.errors)) {
 
-    else if (err?.status === 400) {
-
-      if (err?.error?.errors) {
-
-        const firstError =
-          Object.values(err.error.errors)[0];
-
-        this.submitError =
-          Array.isArray(firstError)
-            ? String(firstError[0])
-            : 'Please check the form and try again.';
+        this.submitError = err.error.errors[0];
 
       }
-
       else {
 
         this.submitError =
-          err?.error?.message ||
+          backendMessage ||
           'Invalid data. Please check the form.';
+
+       
+        if (backendMessage?.toLowerCase().includes('isbn')) {
+
+          this.form.get('isbn')?.setErrors({ backend: true });
+
+          this.form.get('isbn')?.markAsTouched();
+
+        }
 
       }
 
     }
+    else if (err?.status === 404) {
 
+      this.submitError =
+        backendMessage ||
+        'The requested book was not found.';
+
+    }
     else {
 
       this.submitError =
