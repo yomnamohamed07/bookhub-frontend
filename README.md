@@ -1,127 +1,316 @@
 
 # The Shelf — Bookhub Frontend
 
-A simple Angular 17 frontend for managing a library's book catalog. Built with standalone components and reactive forms.
+A simple and responsive **Angular 17** frontend for managing a bookstore's book catalog.
+The application provides a clean interface for viewing, adding, editing, and deleting books through a RESTful backend API.
 
-![Angular](https://img.shields.io/badge/Angular-17-DD0031?logo=angular&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+Built using **standalone components**, **Reactive Forms**, and Angular's **HttpClient** and **Router**.
+
+![Angular](https://img.shields.io/badge/Angular-17-DD0031?logo=angular\&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript\&logoColor=white)
 
 ## Overview
 
-Two main pages:
+The application provides two main pages:
 
-- **Catalog** — shows all books.
-- **Add / Edit Book** — one reusable form for adding a new book or editing an existing one. It can be used as a standalone routed page or embedded inside another component.
+* **Catalog** — displays all available books with their details and actions.
+* **Add / Edit Book** — a reusable form used for both creating a new book and updating an existing book.
+
+The frontend communicates with the Bookhub ASP.NET Core Web API using HTTP requests.
 
 ## Features
 
-- Reactive forms with full validation (required, min/max length, min value).
-- Clear handling of server errors (400 / 404 / generic failures).
-- Duplicate ISBN errors are shown right under the ISBN field.
-- Clean project structure (models / services / components).
+* View the complete book catalog.
+* Add a new book.
+* Edit an existing book.
+* Delete a book.
+* Reactive form validation.
+* Client-side validation before submitting requests.
+* Server-side error handling.
+* Duplicate ISBN errors displayed directly under the ISBN field.
+* 404 handling when a requested book does not exist.
+* Loading and error states.
+* Reusable Add/Edit form component.
+* Angular routing.
+* REST API integration using `HttpClient`.
+* Standalone Angular components.
 
 ## Tech Stack
 
-- Angular 17 (standalone components)
-- Reactive Forms
-- Angular HttpClient
-- Angular Router
-- TypeScript
+* Angular 17
+* TypeScript
+* Reactive Forms
+* Angular HttpClient
+* Angular Router
+* HTML5
+* CSS
 
 ## Project Structure
 
+```text
+src/
+└── app/
+    ├── models/
+    │   └── book.model.ts
+    │
+    ├── services/
+    │   └── book.service.ts
+    │
+    └── components/
+        ├── book-list/
+        │   ├── book-list.component.ts
+        │   ├── book-list.component.html
+        │   └── book-list.component.css
+        │
+        └── book-form/
+            ├── book-form.component.ts
+            ├── book-form.component.html
+            └── book-form.component.css
+
+src/environments/
+└── environment.ts
 ```
-src/app/
- ├── models/book.model.ts          # Book / AddBookDto / UpdateBookDto
- ├── services/book.service.ts      # All API calls (CRUD)
- ├── components/book-list/         # Catalog page
- └── components/book-form/         # Add / Edit page
-src/environments/environment.ts    # Backend URL goes here
+
+### Models
+
+`book.model.ts` contains the TypeScript interfaces used by the application, including:
+
+* `Book`
+* `AddBookDto`
+* `UpdateBookDto`
+
+### Book Service
+
+`book.service.ts` is responsible for communicating with the backend API.
+
+It contains the HTTP operations required for:
+
+* Getting books
+* Getting a book by ID
+* Adding a book
+* Updating a book
+* Deleting a book
+
+### Book List
+
+The catalog component retrieves books from the API and displays them to the user.
+
+It also provides actions for:
+
+* Editing a book
+* Deleting a book
+* Navigating to the Add Book page
+
+### Book Form
+
+The same form component is used for both **Add** and **Edit** operations.
+
+The component determines the current mode from the route and loads the existing book data when editing.
+
+## Book Data
+
+Each book contains:
+
+| Property          | Type     | Description                        |
+| ----------------- | -------- | ---------------------------------- |
+| `id`              | `number` | Unique book identifier             |
+| `title`           | `string` | Book title                         |
+| `author`          | `string` | Book author                        |
+| `isbn`            | `string` | International Standard Book Number |
+| `category`        | `string` | Book category                      |
+| `availableCopies` | `number` | Number of available copies         |
+
+## Form Validation
+
+The frontend performs client-side validation before sending requests to the API.
+
+### Title
+
+* Required
+* Minimum 3 characters
+* Maximum 200 characters
+
+### Author
+
+* Required
+* Minimum 3 characters
+* Maximum 200 characters
+
+### ISBN
+
+* Required
+* Maximum 20 characters
+* Duplicate ISBN validation is handled by the backend
+
+### Category
+
+* Required
+* Minimum 2 characters
+* Maximum 200 characters
+
+### Available Copies
+
+* Required
+* Must be a number
+* Cannot be negative
+
+Validation messages are displayed next to the corresponding fields to provide immediate feedback.
+
+## API Integration
+
+The backend API URL is configured through:
+
+```text
+src/environments/environment.ts
 ```
 
-## Getting Started
-
-**Requirements:** Node.js 18+ and Angular CLI
-
-```bash
-npm install
-npm start
-```
-
-The app runs at `http://localhost:4200`.
-
-## Connecting the Backend
-
-Set your API URL in `src/environments/environment.ts`:
+Example:
 
 ```ts
 export const environment = {
   production: false,
-  apiUrl: 'https://localhost:5001/api/books'   // change this
+  apiUrl: 'https://localhost:5001/api/books'
 };
 ```
 
-### Expected API (RESTful)
+Change the URL according to the backend environment.
 
-| Method | Route              | Purpose      |
-| ------ | ------------------ | ------------ |
-| GET    | `/api/books`        | List all books |
-| GET    | `/api/books/{id}`   | Get one book |
-| POST   | `/api/books`        | Create a book |
-| PUT    | `/api/books/{id}`   | Update a book |
-| DELETE | `/api/books/{id}`   | Delete a book |
+## API Endpoints
 
-### Book JSON shape
+The frontend consumes the following RESTful endpoints:
 
-```json
-{
-  "id": 1,
-  "title": "string",
-  "author": "string",
-  "isbn": "string",
-  "category": "string",
-  "availableCopies": 0
-}
+| Method   | Endpoint          | Purpose         |
+| -------- | ----------------- | --------------- |
+| `GET`    | `/api/books`      | Retrieve books  |
+| `GET`    | `/api/books/{id}` | Retrieve a book |
+| `POST`   | `/api/books`      | Create a book   |
+| `PUT`    | `/api/books/{id}` | Update a book   |
+| `DELETE` | `/api/books/{id}` | Delete a book   |
+
+## Error Handling
+
+The application handles common API errors:
+
+### `400 Bad Request`
+
+Used for validation failures and business validation errors.
+
+For example, when the ISBN already exists, the backend error is displayed directly under the ISBN field.
+
+### `404 Not Found`
+
+Displayed when the requested book does not exist.
+
+### Other Errors
+
+Unexpected server errors are handled and displayed as a general error message instead of leaving the user without feedback.
+
+## CORS
+
+When running the frontend and backend locally, they normally use different origins.
+
+The backend must allow:
+
+```text
+http://localhost:4200
 ```
 
-### CORS
+For ASP.NET Core, the backend can configure CORS to allow requests from the Angular development server.
 
-The backend must allow the frontend's origin (`http://localhost:4200`), or requests will be blocked by the browser. Example for ASP.NET Core:
+## Getting Started
 
-```csharp
-builder.Services.AddCors(o => o.AddPolicy("AllowFrontend", p =>
-    p.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod()));
-// ...
-app.UseCors("AllowFrontend");
+### Requirements
+
+* Node.js 18+
+* npm
+* Angular CLI
+
+### Install Dependencies
+
+```bash
+npm install
 ```
 
-### Duplicate ISBN
+### Run the Application
 
-The frontend reads the error message from the server response and displays it under the ISBN field. If your backend uses a different field name for the message, update the matching logic in:
-
-```
-src/app/components/book-form/book-form.component.ts → handleError()
+```bash
+npm start
 ```
 
-## Client-side Validation
+The application will be available at:
 
-- **Title / Author**: required, 3–200 characters.
-- **ISBN**: required, up to 20 characters (duplicate check happens on the server).
-- **Category**: required, 2–200 characters.
-- **Available Copies**: number, cannot be negative.
+```text
+http://localhost:4200
+```
 
-## Deployment
+## Connecting to the Backend
 
-Deployment setup for this project was configured with help from **Claude** (Anthropic). Before building for production, make sure `environment.prod.ts` points to your real API URL:
+Make sure the backend API is running and update:
+
+```text
+src/environments/environment.ts
+```
+
+with the correct API URL.
+
+The complete application flow is:
+
+```text
+Angular Frontend
+      │
+      │ HTTP
+      ▼
+ASP.NET Core Web API
+      │
+      ▼
+SQL Server
+```
+
+## Production Build
+
+To create a production build:
 
 ```bash
 ng build --configuration production
 ```
 
-## Contributing
+Before building, make sure the production environment contains the correct backend API URL.
 
-PRs and suggestions are welcome. For bigger changes, please open an issue first.
+## Deployment
 
-## License
+The frontend can be deployed to any static hosting platform that supports Angular applications.
 
-MIT
+When deploying, make sure that:
+
+1. The production API URL is configured correctly.
+2. The backend allows the deployed frontend origin through CORS.
+3. The application is built using the production configuration.
+
+## Assessment Requirements
+
+The frontend covers the required bookstore management functionality:
+
+* [x] Display books
+* [x] Add a book
+* [x] Edit a book
+* [x] Delete a book
+* [x] Reactive form validation
+* [x] API integration
+* [x] Server error handling
+* [x] Duplicate ISBN error handling
+* [x] Reusable Add/Edit form
+
+## Related Project
+
+**Backend:** BookHub API — ASP.NET Core Web API
+
+The backend provides the RESTful API consumed by this Angular application.
+
+## Author
+
+**Yomna Mohamed Fathy**
+
+Computer Science Graduate | .NET Backend Developer
+
+GitHub: [yomnamohamed07](https://github.com/yomnamohamed07)
+
